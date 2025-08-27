@@ -34,9 +34,13 @@ impl Screen {
         Self::flush();
     }
 
-    pub fn draw (&mut self, line: Line, column: Column, character: char) {
+    pub fn draw(&mut self, line: Line, column: Column, character: char) {
         self.cursor.jump(line, column);
         print!("{character}");
+    }
+
+    pub fn delete(&mut self, line: Line, column: Column) {
+        self.draw(line, column, ' ');
     }
 
     /// Returns width and height as tuple

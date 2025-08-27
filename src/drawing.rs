@@ -1,9 +1,21 @@
-use crate::{Position, screen::Screen};
+use crate::{screen::Screen, Position, Snake};
 
 pub struct Drawer;
 
 impl Drawer {
-    pub fn draw_rectangle (screen: &mut Screen, start: Position, width: u16, height: u16) {
+    pub fn delete_snake(screen: &mut Screen, snake: &Snake) {
+        for position in snake.get_positions() {
+            screen.delete(position.line, position.column);
+        }
+    }
+
+    pub fn draw_snake(screen: &mut Screen, snake: &Snake) {
+        for position in snake.get_positions() {
+            screen.draw(position.line, position.column, '⚪');
+        }
+    }
+
+    pub fn draw_rectangle(screen: &mut Screen, start: Position, width: u16, height: u16) {
         let cursor = &mut screen.cursor;
         if width == 0 || height == 0 {
             return;
