@@ -1,8 +1,10 @@
 mod cursor;
 mod drawing;
 mod screen;
+mod snake;
 
-use std::{thread::sleep, time::Duration};
+use snake::{Snake, SnakeNode};
+use std::{fmt::Display, thread::sleep, time::Duration};
 
 use crossterm::event::{Event, KeyCode};
 use drawing::Drawer;
@@ -71,132 +73,6 @@ pub enum Direction {
     Right,
 }
 
-#[derive(Debug)]
-pub struct Snake {
-    direction: Direction,
-    prev_direction: Direction,
-    positions: Vec<Position>, // First element is the head
-}
-
-impl Snake {
-    pub fn new() -> Self {
-        Self::from(Direction::Up, vec![Position { line: 1, column: 1 }])
-    }
-
-    pub fn from(direction: Direction, positions: Vec<Position>) -> Self {
-        Snake {
-            direction,
-            prev_direction: Direction::Up,
-            positions,
-        }
-    }
-
-    pub fn update_positions(&mut self) {
-        let len = self.positions.len();
-        let head = *self.get_head().unwrap();
-        info!("Length: {len}");
-        for position in self.positions.iter_mut() {
-            info!(
-                "Before... Line: {}, Column: {}",
-                position.line, position.column
-            );
-            match self.direction {
-                Direction::Up => position.decrement_line(1),
-                Direction::Down => {
-                    if len == 1 {
-                        position.line += 1;
-                        continue;
-                    }
-
-                    match self.prev_direction {
-                        Direction::Left | Direction::Right | Direction::Down => position.line += 1,
-                        _ => (),
-                    }
-                }
-                Direction::Left => {
-                    if let Direction::Left = self.prev_direction {
-                        continue;
-                    }
-
-                    if *position == head {
-                        position.decrement_col(1);
-                        continue;
-                    }
-                    position.increment_line(1);
-                }
-                Direction::Right => {
-                    if let Direction::Right = self.prev_direction {
-                        position.increment_col(1);
-                        continue;
-                    }
-
-                    if *position == head {
-                        position.increment_col(1);
-                        continue;
-                    } else {
-                        position.decrement_line(1);
-                    }
-                }
-            }
-            info!(
-                "After... Line: {}, Column: {}",
-                position.line, position.column
-            );
-        }
-    }
-
-    pub fn get_head(&self) -> Option<&Position> {
-        self.positions.first()
-    }
-
-    pub fn get_tail(&self) -> Option<&Position> {
-        self.positions.last()
-    }
-
-    pub fn get_positions(&self) -> &Vec<Position> {
-        &self.positions
-    }
-
-    pub fn get_direction(&self) -> Direction {
-        self.direction
-    }
-
-    pub fn add_tail(&mut self) {
-        if let Some(tail) = self.get_tail() {
-            let position: Position = match self.direction {
-                Direction::Up => Position {
-                    line: tail.line + 1,
-                    column: tail.column,
-                },
-                Direction::Down => Position {
-                    line: tail.line - 1,
-                    column: tail.column,
-                },
-                Direction::Right => Position {
-                    line: tail.line,
-                    column: tail.column - 1,
-                },
-                Direction::Left => Position {
-                    line: tail.line,
-                    column: tail.column + 1,
-                },
-            };
-            self.positions.push(position);
-        }
-    }
-
-    pub fn change_direction(&mut self, direction: Direction) {
-        self.prev_direction = self.direction;
-        self.direction = direction;
-    }
-}
-
-impl Default for Snake {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
 #[derive(Debug, Default)]
 pub struct SnakeGame {
     screen: Screen,
@@ -225,9 +101,15 @@ impl SnakeGame {
         // Draw screen borders
         Drawer::draw_rectangle(screen, Position { line: 1, column: 0 }, width, height);
 
-        self.snake = Snake::from(Direction::Up, vec![self.random_position()]);
+        self.snake = Snake::new(Direction::Up, SnakeNode::new(Position::new(10, 10)));
         self.random_food_position();
-        while self.food_position == *self.snake.get_head().expect("Should have a head") {
+        while self.food_position
+            == *self
+                .snake
+                .get_head()
+                .expect("Should have a head")
+                .get_position()
+        {
             self.random_food_position();
         }
         self.render_food();
@@ -248,7 +130,13 @@ impl SnakeGame {
 
             Drawer::draw_snake(&mut self.screen, &self.snake); // Draws new snake
 
-            if self.food_position == *self.snake.get_head().expect("Should have a head") {
+            if self.food_position
+                == *self
+                    .snake
+                    .get_head()
+                    .expect("Should have a head")
+                    .get_position()
+            {
                 info!(
                     "Ate food at line {} and column {}",
                     self.food_position.line, self.food_position.column
