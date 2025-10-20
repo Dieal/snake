@@ -1,25 +1,41 @@
 use log::info;
 
-use crate::{Position, Snake, screen::Screen};
+use crate::{screen::Screen, Column, Line, Position, snake::Snake};
 
 pub struct Drawer;
-
 impl Drawer {
+    fn eat_cell(screen: &mut Screen, line: Line, column: Column) {
+        screen.draw(line, column, ' ');
+    }
+
     pub fn delete_snake(screen: &mut Screen, snake: &Snake) {
         info!("======== Start Deleting snake ======");
         for node in snake.get_list() {
             let position = node.get_position();
-            screen.delete(position.line, position.column);
+            Self::eat_cell(screen, position.line, position.column);
             info!("Deleted at {:?}", position);
         }
         info!("======== End Deleting snake ======");
     }
 
+    pub fn render_food(screen: &mut Screen, food_position: &Position) {
+        Screen::draw(
+            screen,
+            food_position.line,
+            food_position.column,
+            '✿',
+        );
+    }
+
     pub fn draw_snake(screen: &mut Screen, snake: &Snake) {
         info!("======== Start Drawing snake ======");
-        for node in snake.get_list() {
+        let mut iterator = snake.get_list().iter();
+        let head = iterator.next().expect("Should have head").get_position();
+        screen.draw(head.line, head.column, '◉');
+
+        for node in iterator {
             let position = node.get_position();
-            screen.draw(position.line, position.column, '⚪');
+            screen.draw(position.line, position.column, '⬤');
             info!("Drawed at {:?}", position);
         }
         info!("======== End Drawing snake ======");

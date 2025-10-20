@@ -1,7 +1,6 @@
 use std::fs::File;
-
 use simplelog::{Config, LevelFilter, WriteLogger};
-use snake::SnakeGame;
+use snake::game::SnakeGame;
 
 fn main() {
     let _ = WriteLogger::init(
