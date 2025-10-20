@@ -32,7 +32,8 @@ impl SnakeGame {
         screen.hide_cursor();
 
         let (width, height) = screen.get_terminal_size();
-        Drawer::draw_rectangle(screen, Position { line: 1, column: 0 }, width, height);
+        Drawer::draw_rectangle(screen, Position { line: 2, column: 0 }, width, height);
+        Drawer::draw_text(screen, format!("Score: {}", self.score).as_str(), Position { line: 1, column: 2});
 
         let head_position = self.random_position();
         self.snake = Snake::new(Direction::Up, SnakeNode::new(
@@ -76,6 +77,7 @@ impl SnakeGame {
                     &mut self.screen, 
                     &self.food_position
                 );
+                Drawer::draw_text(&mut self.screen, format!("Score: {}", self.score).as_str(), Position { line: 1, column: 2});
             }
 
             Screen::flush();

@@ -8,6 +8,14 @@ impl Drawer {
         screen.draw(line, column, ' ');
     }
 
+    pub fn draw_text(screen: &mut Screen, text: &str, position: Position) {
+        let mut column = position.column;
+        for char in text.chars() {
+            screen.draw(position.line, column, char);
+            column += 1;
+        }
+    }
+
     pub fn delete_snake(screen: &mut Screen, snake: &Snake) {
         info!("======== Start Deleting snake ======");
         for node in snake.get_list() {
