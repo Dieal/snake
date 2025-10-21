@@ -4,9 +4,7 @@ use log::info;
 
 use crate::Border;
 use crate::Direction;
-use crate::Height;
 use crate::Position;
-use crate::Width;
 
 #[derive(Debug, Default)]
 #[allow(dead_code)]
@@ -59,6 +57,78 @@ impl Snake {
         for node in self.list.iter_mut() {
             node.get_position_mut().set_boundaries(boundaries);
         }
+    }
+
+    // Checks if the head is blocked by another node and can't go in that direction
+    pub fn can_go_in_direction(&self, direction: Direction) -> bool {
+        let mut iterator = self.list.iter();
+        if let (Some(head), Some(node)) = (iterator.next(), iterator.next()) {
+            let head_position = head.get_position();
+            let node_position = node.get_position();
+            let same_line: bool = head_position.line == node_position.line;
+            let same_column: bool = head_position.column == node_position.column;
+
+            // Returns false if it can't go in that direction
+            match direction {
+                Direction::Up => return !(same_column && head_position.line - 1 == node_position.line),
+                Direction::Down => return !(same_column && head_position.line + 1 == node_position.line),
+                Direction::Left => return !(same_line && head_position.column - 1 == node_position.column),
+                Direction::Right => return !(same_line && head_position.column + 1 == node_position.column),
+            }
+        }
+        true
+    }
+
+    pub fn can_go_up(&self) -> bool {
+        let mut iterator = self.list.iter();
+        if let (Some(head), Some(node)) = (iterator.next(), iterator.next()) {
+            let head_position = head.get_position();
+            let node_position = node.get_position();
+            if head_position.column == node_position.column 
+                && head_position.line - 1 == node_position.line {
+                return false;
+            }
+        }
+        true
+    }
+
+    pub fn can_go_down(&self) -> bool {
+        let mut iterator = self.list.iter();
+        if let (Some(head), Some(node)) = (iterator.next(), iterator.next()) {
+            let head_position = head.get_position();
+            let node_position = node.get_position();
+            if head_position.column == node_position.column 
+                && head_position.line + 1 == node_position.line {
+                return false;
+            }
+        }
+        true
+    }
+
+    pub fn can_go_left(&self) -> bool {
+        let mut iterator = self.list.iter();
+        if let (Some(head), Some(node)) = (iterator.next(), iterator.next()) {
+            let head_position = head.get_position();
+            let node_position = node.get_position();
+            if head_position.line == node_position.line
+                && head_position.column - 1 == node_position.column {
+                return false;
+            }
+        }
+        true
+    }
+
+    pub fn can_go_right(&self) -> bool {
+        let mut iterator = self.list.iter();
+        if let (Some(head), Some(node)) = (iterator.next(), iterator.next()) {
+            let head_position = head.get_position();
+            let node_position = node.get_position();
+            if head_position.line == node_position.line
+                && head_position.column + 1 == node_position.column {
+                return false;
+            }
+        }
+        true
     }
 
     pub fn update_positions(&mut self) {

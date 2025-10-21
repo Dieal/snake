@@ -125,16 +125,24 @@ impl SnakeGame {
             if let Event::Key(key) = event {
                 match key.code {
                     KeyCode::Left | KeyCode::Char('h') | KeyCode::Char('a') => {
-                        self.snake.change_direction(Direction::Left)
+                        if self.snake.can_go_in_direction(Direction::Left) {
+                            self.snake.change_direction(Direction::Left)
+                        }
                     }
                     KeyCode::Right | KeyCode::Char('l') | KeyCode::Char('d') => {
-                        self.snake.change_direction(Direction::Right)
+                        if self.snake.can_go_in_direction(Direction::Right) {
+                            self.snake.change_direction(Direction::Right)
+                        }
                     }
                     KeyCode::Up | KeyCode::Char('k') | KeyCode::Char('w') => {
-                        self.snake.change_direction(Direction::Up)
+                        if self.snake.can_go_in_direction(Direction::Up) {
+                            self.snake.change_direction(Direction::Up)
+                        }
                     }
                     KeyCode::Down | KeyCode::Char('j') | KeyCode::Char('s') => {
-                        self.snake.change_direction(Direction::Down)
+                        if self.snake.can_go_in_direction(Direction::Down) {
+                            self.snake.change_direction(Direction::Down)
+                        }
                     }
                     KeyCode::Esc | KeyCode::Char('q') => should_exit = true,
                     _ => (),
