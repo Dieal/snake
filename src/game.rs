@@ -2,7 +2,7 @@ use std::{thread::sleep, time::Duration};
 use crossterm::event::{Event, KeyCode};
 use log::info;
 use rand::Rng;
-use crate::{drawing, Direction, Position};
+use crate::{drawing, Border, Direction, Position};
 use crate::screen::Screen;
 use crate::drawing::Drawer;
 use crate::snake::{Snake, SnakeNode};
@@ -26,19 +26,38 @@ impl SnakeGame {
         }
     }
 
-    pub fn run(&mut self) {
+    pub fn init(&mut self) {
         let screen = &mut self.screen;
         screen.init();
         screen.hide_cursor();
-
         let (width, height) = screen.get_terminal_size();
-        Drawer::draw_rectangle(screen, Position { line: 2, column: 0 }, width, height);
-        Drawer::draw_text(screen, format!("Score: {}", self.score).as_str(), Position { line: 1, column: 2});
 
+        let border: Border = Border::new(0, width, 2, height);
+        Drawer::draw_rectangle(
+            screen, 
+            Position::new(
+                border.start_line, 
+                border.start_col
+            ), 
+            border.end_col, 
+            border.end_line
+        );
+        Drawer::draw_text(screen, format!("Score: {}", self.score).as_str(), Position::new(1, 2));
+
+        let snake_boundaries: Border = Border::new(
+            border.start_col + 2, 
+            width - 1, 
+            border.start_line + 1, 
+            height - 1
+        );
         let head_position = self.random_position();
-        self.snake = Snake::new(Direction::Up, SnakeNode::new(
-            head_position
-        ));
+        self.snake = Snake::new(
+            Direction::Up, 
+            SnakeNode::new(
+                head_position
+            ),
+            Some(snake_boundaries)
+        );
         self.snake.add_tails(3);
         self.set_random_food_position(&head_position);
 
@@ -46,8 +65,12 @@ impl SnakeGame {
         Drawer::render_food(&mut self.screen, &self.food_position);
         Drawer::draw_snake(&mut self.screen, &self.snake);
         Screen::flush();
+    }
 
-        loop {
+    pub fn run(&mut self) {
+        self.init();
+        let mut game_lost = false;
+        while !game_lost {
             // Handles input and exit if necessary
             if let Ok(should_exit) = self.handle_input() {
                 if should_exit {
@@ -60,6 +83,7 @@ impl SnakeGame {
             self.snake.update_positions();
             Drawer::draw_snake(&mut self.screen, &self.snake); // Draws new snake
 
+            game_lost = self.snake.is_eating_tail();
             let head_position = *self
                 .snake
                 .get_head()
@@ -77,12 +101,16 @@ impl SnakeGame {
                     &mut self.screen, 
                     &self.food_position
                 );
-                Drawer::draw_text(&mut self.screen, format!("Score: {}", self.score).as_str(), Position { line: 1, column: 2});
+                Drawer::draw_text(&mut self.screen, format!("Score: {}", self.score).as_str(), Position::new(1, 2));
             }
 
             Screen::flush();
         }
         Screen::erase_screen();
+        
+        if game_lost {
+            print!("You lost the game");
+        }
     }
 
     fn handle_input(&mut self) -> Result<bool, std::io::Error> {
@@ -119,7 +147,6 @@ impl SnakeGame {
         while position == *invalid_position {
             position = self.random_position();
         }
-
         self.food_position = position;
     }
 

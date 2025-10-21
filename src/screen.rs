@@ -2,7 +2,7 @@ use std::io::{self, Write};
 use std::time::Duration;
 
 use crossterm::event::{poll, read, Event};
-use crossterm::terminal::enable_raw_mode;
+use crossterm::terminal::{self, enable_raw_mode};
 
 use crate::cursor::{Cursor};
 use crate::{Column, Height, Line, Position, Width, ESC};

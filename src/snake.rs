@@ -2,8 +2,11 @@ use std::collections::LinkedList;
 
 use log::info;
 
+use crate::Border;
 use crate::Direction;
+use crate::Height;
 use crate::Position;
+use crate::Width;
 
 #[derive(Debug, Default)]
 #[allow(dead_code)]
@@ -34,14 +37,27 @@ impl SnakeNode {
 pub struct Snake {
     direction: Direction,
     list: LinkedList<SnakeNode>,
+    boundaries: Option<Border>,
 }
 
 #[allow(dead_code)]
 impl Snake {
-    pub fn new(direction: Direction, head: SnakeNode) -> Self {
+    pub fn new(direction: Direction, mut head: SnakeNode, boundaries: Option<Border>) -> Self {
+        if let Some(boundaries) = boundaries {
+            head.get_position_mut().set_boundaries(boundaries);
+        }
+
         Snake {
             direction,
             list: LinkedList::from([head]),
+            boundaries,
+        }
+    }
+
+    pub fn set_boundaries(&mut self, boundaries: Border) {
+        self.boundaries = Some(boundaries);
+        for node in self.list.iter_mut() {
+            node.get_position_mut().set_boundaries(boundaries);
         }
     }
 
@@ -81,6 +97,20 @@ impl Snake {
     pub fn get_list(&self) -> &LinkedList<SnakeNode> {
         &self.list
     }
+    
+    pub fn is_eating_tail(&self) -> bool {
+        let mut iter = self.list.iter();
+        let head = iter.next();
+        if let Some(head) = head {
+            let position = head.get_position();
+            for node in iter {
+                if node.get_position().eq(position) {
+                    return true;
+                }
+            }
+        }
+        false
+    }
 
     pub fn add_tails(&mut self, count: u32) {
         for _ in 0..count {
@@ -117,6 +147,6 @@ impl Snake {
 
 impl Default for Snake {
     fn default() -> Self {
-        Self::new(Direction::Up, SnakeNode::default())
+        Self::new(Direction::Up, SnakeNode::default(), None)
     }
 }

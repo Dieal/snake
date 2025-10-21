@@ -11,15 +11,31 @@ type Height = u16;
 type Width = u16;
 
 #[derive(Default, Debug, Clone, Copy)]
+pub struct Border {
+    pub start_col: Column,
+    pub end_col: Column,
+    pub start_line: Line,
+    pub end_line: Line,
+}
+
+#[allow(dead_code)]
+impl Border {
+    pub fn new(start_col: Column, end_col: Column, start_line: Line, end_line: Line) -> Self {
+        Border { start_col, start_line, end_col, end_line }
+    }
+}
+
+#[derive(Default, Debug, Clone, Copy)]
 pub struct Position {
     pub line: u16,
     pub column: u16,
+    pub boundaries: Option<Border>,
 }
 
 #[allow(dead_code)]
 impl Position {
     pub fn new(line: Line, column: Column) -> Self {
-        Position { line, column }
+        Position { line, column, boundaries: None }
     }
 
     pub fn set_line(&mut self, line: Line) {
@@ -30,30 +46,58 @@ impl Position {
         self.column = column;
     }
 
+    pub fn set_boundaries(&mut self, boundaries: Border) {
+        self.boundaries = Some(boundaries);
+    }
+
     pub fn increment_col(&mut self, offset: Column) {
-        self.set_column(self.column + offset);
+        let mut new_column = self.column + offset;
+        if let Some(boundaries) = self.boundaries {
+            if new_column > boundaries.end_col {
+                new_column = boundaries.start_col;
+            }
+        }
+        self.set_column(new_column);
     }
 
     pub fn decrement_col(&mut self, offset: Column) {
-        if offset < self.column {
-            self.set_column(self.column - offset);
+        let mut new_column = if offset > self.column { 0 } else { self.column - offset };
+        if let Some(boundaries) = self.boundaries {
+            if new_column < boundaries.start_col {
+                new_column = boundaries.end_col;
+            }
         }
+        self.set_column(new_column);
     }
 
     pub fn increment_line(&mut self, offset: Column) {
-        self.set_line(self.line + offset);
+        let mut new_line = self.line + offset;
+        if let Some(boundaries) = self.boundaries {
+            if new_line > boundaries.end_line {
+                new_line = boundaries.start_line;
+            }
+        }
+        self.set_line(new_line);
     }
 
     pub fn decrement_line(&mut self, offset: Column) {
-        if offset < self.line {
-            self.set_line(self.line - offset);
+        let mut new_line = if offset > self.line { 0 } else { self.line - offset };
+        if let Some(boundaries) = self.boundaries {
+            if new_line < boundaries.start_line {
+                new_line = boundaries.end_line;
+            }
         }
+        self.set_line(new_line);
+    }
+
+    pub fn equals(pos1: &Self, pos2: &Self) -> bool {
+        pos1.line == pos2.line && pos1.column == pos2.column
     }
 }
 
 impl PartialEq for Position {
     fn eq(&self, other: &Self) -> bool {
-        self.line == other.line && self.column == other.column
+        Self::equals(self, other)  
     }
 }
 

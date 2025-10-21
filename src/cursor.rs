@@ -10,10 +10,7 @@ pub struct Cursor {
 impl Cursor {
     pub fn new() -> Self {
         Cursor {
-            position: Position {
-                line: 0,
-                column: 0,
-            },
+            position: Position::new(0, 0,),
             hidden: false,
         }
     }
