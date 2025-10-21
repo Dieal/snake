@@ -2,7 +2,7 @@ use std::{thread::sleep, time::Duration};
 use crossterm::event::{Event, KeyCode};
 use log::info;
 use rand::Rng;
-use crate::{drawing, Border, Direction, Position};
+use crate::{Border, Direction, Position};
 use crate::screen::Screen;
 use crate::drawing::Drawer;
 use crate::snake::{Snake, SnakeNode};
@@ -14,25 +14,29 @@ pub struct SnakeGame {
     score: u16,
     food_position: Position,
     snake: Snake,
+    border: Border,
 }
 
 impl SnakeGame {
     pub fn new() -> Self {
+        let mut screen: Screen = Screen::new();
+        screen.init();
+        screen.hide_cursor();
+
+        let (width, height) = screen.get_terminal_size();
         SnakeGame {
-            screen: Screen::new(),
+            screen,
             score: 0,
             food_position: Position::default(),
             snake: Snake::default(),
+            border: Border::new(0, width, 2, height),
         }
     }
 
     pub fn init(&mut self) {
         let screen = &mut self.screen;
-        screen.init();
-        screen.hide_cursor();
         let (width, height) = screen.get_terminal_size();
-
-        let border: Border = Border::new(0, width, 2, height);
+        let border: Border = self.border;
         Drawer::draw_rectangle(
             screen, 
             Position::new(
@@ -152,7 +156,10 @@ impl SnakeGame {
 
     fn random_position(&mut self) -> Position {
         let mut rng = rand::rng();
-        let (width, height) = self.screen.get_terminal_size();
-        Position::new(rng.random_range(1..height-1), rng.random_range(1..width-1))
+        let border: Border = self.border;
+        Position::new(
+            rng.random_range(border.start_line + 1..border.end_line-1), 
+            rng.random_range(border.start_col + 1..border.end_line-1)
+        )
     }
 }
