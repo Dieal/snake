@@ -5,6 +5,10 @@ mod screen;
 mod snake;
 
 const ESC: &str = "\x1b";
+const WHITE: u16 = 37;
+const GREEN: u16 = 32;
+const BLUE: u16 = 34;
+const RED: u16 = 31;
 type Line = u16;
 type Column = u16;
 type Height = u16;

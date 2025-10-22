@@ -5,7 +5,7 @@ use crossterm::event::{poll, read, Event};
 use crossterm::terminal::{self, enable_raw_mode};
 
 use crate::cursor::{Cursor};
-use crate::{Column, Height, Line, Position, Width, ESC};
+use crate::{Column, Height, Line, WHITE, Position, Width, ESC};
 
 #[derive(Default, Debug)]
 pub struct Screen {
@@ -36,7 +36,13 @@ impl Screen {
 
     pub fn draw(&mut self, line: Line, column: Column, character: char) {
         self.cursor.jump(line, column);
-        print!("{character}");
+        print!("{ESC}[{WHITE}m{character}");
+    }
+
+    // https://gist.github.com/ConnerWill/d4b6c776b509add763e17f9f113fd25b#colors--graphics-mode
+    pub fn draw_colored(&mut self, line: Line, column: Column, character: char, color: u16) {
+        self.cursor.jump(line, column);
+        print!("{ESC}[{color}m{character}");
     }
 
     pub fn delete(&mut self, line: Line, column: Column) {

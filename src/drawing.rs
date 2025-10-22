@@ -1,6 +1,6 @@
 use log::info;
 
-use crate::{screen::Screen, Column, Line, Position, snake::Snake};
+use crate::{screen::Screen, snake::Snake, Column, Line, Position, BLUE, GREEN, RED};
 
 pub struct Drawer;
 impl Drawer {
@@ -27,11 +27,12 @@ impl Drawer {
     }
 
     pub fn render_food(screen: &mut Screen, food_position: &Position) {
-        Screen::draw(
+        Screen::draw_colored(
             screen,
             food_position.line,
             food_position.column,
             '✿',
+            RED
         );
     }
 
@@ -39,11 +40,11 @@ impl Drawer {
         info!("======== Start Drawing snake ======");
         let mut iterator = snake.get_list().iter();
         let head = iterator.next().expect("Should have head").get_position();
-        screen.draw(head.line, head.column, '◉');
+        screen.draw_colored(head.line, head.column, '◉', GREEN);
 
         for node in iterator {
             let position = node.get_position();
-            screen.draw(position.line, position.column, '⬤');
+            screen.draw_colored(position.line, position.column, '⬤', GREEN);
             info!("Drawed at {:?}", position);
         }
         info!("======== End Drawing snake ======");
