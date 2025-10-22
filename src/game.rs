@@ -29,7 +29,7 @@ impl SnakeGame {
             score: 0,
             food_position: Position::default(),
             snake: Snake::default(),
-            border: Border::new(0, width, 2, height),
+            border: Border::new(5, width - 10, 4, height - 5),
         }
     }
 
@@ -46,7 +46,7 @@ impl SnakeGame {
             border.end_col, 
             border.end_line
         );
-        Drawer::draw_text(screen, format!("Score: {}", self.score).as_str(), Position::new(1, 2));
+        Drawer::draw_text(screen, format!("Score: {}", self.score).as_str(), Position::new(border.start_line - 1, border.start_col + 2));
 
         let snake_boundaries: Border = Border::new(
             border.start_col + 2, 
@@ -166,8 +166,8 @@ impl SnakeGame {
         let mut rng = rand::rng();
         let border: Border = self.border;
         Position::new(
-            rng.random_range(border.start_line + 1..border.end_line-1), 
-            rng.random_range(border.start_col + 1..border.end_line-1)
+            rng.random_range(border.start_line + 2..border.end_line-1), 
+            rng.random_range(border.start_col + 2..border.end_col-1)
         )
     }
 }
