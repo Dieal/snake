@@ -6,20 +6,34 @@ use crate::Border;
 use crate::Direction;
 use crate::Position;
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 #[allow(dead_code)]
 pub struct SnakeNode {
     position: Position,
+    direction: Option<Direction>,
+}
+
+impl Default for SnakeNode {
+    fn default() -> Self {
+        SnakeNode { 
+            position: Position::default(),
+            direction: Some(Direction::Up),
+        }
+    }
 }
 
 #[allow(dead_code)]
 impl SnakeNode {
     pub fn new(position: Position) -> Self {
-        SnakeNode { position }
+        SnakeNode { position, direction: None }
     }
 
     pub fn get_position(&self) -> &Position {
         &self.position
+    }
+
+    pub fn get_direction(&self) -> Option<Direction> {
+        self.direction
     }
 
     pub fn get_position_mut(&mut self) -> &mut Position {
@@ -28,6 +42,10 @@ impl SnakeNode {
 
     pub fn set_position(&mut self, position: Position) {
         self.position = position;
+    }
+
+    pub fn set_direction(&mut self, direction: Direction) {
+        self.direction = Some(direction);
     }
 }
 
@@ -92,6 +110,8 @@ impl Snake {
         let direction = self.direction;
         let mut iterator = self.list.iter_mut();
         if let Some(head) = iterator.next() {
+            let mut previous_direction: Option<Direction> = Some(direction);
+            head.set_direction(direction);
             let head_position = head.get_position_mut();
             let mut previous_position: Position = *head_position;
             match direction {
@@ -104,9 +124,15 @@ impl Snake {
             info!("[HEAD] Before: {:?}, After: {:?}", previous_position, head_position);
             for node in iterator {
                 let temp_position = *node.get_position();
+                let temp_direction = node.get_direction();
                 node.set_position(previous_position);
+
+                if let Some(direction) = previous_direction {
+                    node.set_direction(direction);
+                }
                 info!("[NODE] Before: {:?}, After: {:?}", previous_position, temp_position);
                 previous_position = temp_position;
+                previous_direction = temp_direction;
             }
         }
         info!("==== END UPDATING POSITION ====");

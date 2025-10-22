@@ -1,6 +1,6 @@
 use log::info;
 
-use crate::{game::{Object, ObjectType}, screen::Screen, snake::Snake, Border, Column, Line, Position, GREEN, RED};
+use crate::{game::{Object, ObjectType}, screen::Screen, snake::Snake, Border, Column, Line, Direction, Position, GREEN, RED};
 
 pub struct Drawer;
 impl Drawer {
@@ -49,7 +49,15 @@ impl Drawer {
 
         for node in iterator {
             let position = node.get_position();
-            screen.draw_colored(position.line, position.column, '⬤', GREEN);
+            if let Some(direction) = node.get_direction() {
+                let character = match direction {
+                    Direction::Right | Direction::Left => '━',
+                    Direction::Up | Direction::Down => '┃',
+                };
+                screen.draw_colored(position.line, position.column, character, GREEN);
+            } else {
+                screen.draw_colored(position.line, position.column, '⬤', GREEN);
+            }
             info!("Drawed at {:?}", position);
         }
         info!("======== End Drawing snake ======");
