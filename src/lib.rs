@@ -1,3 +1,5 @@
+use log::info;
+
 pub mod game;
 mod cursor;
 mod drawing;
@@ -57,7 +59,8 @@ impl Position {
     pub fn increment_col(&mut self, offset: Column) {
         let mut new_column = self.column + offset;
         if let Some(boundaries) = self.boundaries {
-            if new_column > boundaries.end_col {
+            if new_column >= boundaries.end_col {
+                info!("[Increasing column] New Column: {new_column}, End Column: {}", boundaries.end_col);
                 new_column = boundaries.start_col;
             }
         }

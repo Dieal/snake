@@ -24,12 +24,13 @@ impl SnakeGame {
         screen.hide_cursor();
 
         let (width, height) = screen.get_terminal_size();
+        info!("[Screen] Width: {width}, Height: {height}");
         SnakeGame {
             screen,
             score: 0,
             food_position: Position::default(),
             snake: Snake::default(),
-            border: Border::new(5, width - 10, 4, height - 5),
+            border: Border::new(5, width - 5, 4, height - 4),
         }
     }
 
@@ -37,15 +38,8 @@ impl SnakeGame {
         let screen = &mut self.screen;
         let (width, height) = screen.get_terminal_size();
         let border: Border = self.border;
-        Drawer::draw_rectangle(
-            screen, 
-            Position::new(
-                border.start_line, 
-                border.start_col
-            ), 
-            border.end_col, 
-            border.end_line
-        );
+        info!("[Border]\n{:#?}", border);
+        Drawer::draw_borders(screen, &border);
         Drawer::draw_text(screen, format!("Score: {}", self.score).as_str(), Position::new(border.start_line - 1, border.start_col + 2));
 
         let snake_boundaries: Border = Border::new(
@@ -105,7 +99,7 @@ impl SnakeGame {
                     &mut self.screen, 
                     &self.food_position
                 );
-                Drawer::draw_text(&mut self.screen, format!("Score: {}", self.score).as_str(), Position::new(1, 2));
+                Drawer::draw_text(&mut self.screen, format!("Score: {}", self.score).as_str(), Position::new(self.border.start_line - 1, self.border.start_col + 2));
             }
 
             Screen::flush();

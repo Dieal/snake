@@ -1,6 +1,6 @@
 use log::info;
 
-use crate::{screen::Screen, snake::Snake, Column, Line, Position, BLUE, GREEN, RED};
+use crate::{screen::Screen, snake::Snake, Border, Column, Line, Position, BLUE, GREEN, RED};
 
 pub struct Drawer;
 impl Drawer {
@@ -50,43 +50,55 @@ impl Drawer {
         info!("======== End Drawing snake ======");
     }
 
+    pub fn draw_borders(screen: &mut Screen, border: &Border) {
+        Self::draw_rectangle(
+            screen, 
+            Position::new(
+                border.start_line, 
+                border.start_col
+            ), 
+            border.end_col - border.start_col,
+            border.end_line - border.start_line
+        );
+    }
+
     pub fn draw_rectangle(screen: &mut Screen, start: Position, width: u16, height: u16) {
         let cursor = &mut screen.cursor;
         if width == 0 || height == 0 {
             return;
         }
 
-        let top_line = start.line;
-        let bottom_line = top_line + height;
-        let left_column = start.column;
-        let right_column = left_column + width;
-        cursor.jump(top_line, left_column);
+        let start_line = start.line;
+        let end_line = start_line + height;
+        let start_col = start.column;
+        let end_col = start_col + width;
+        cursor.jump(start_line, start_col);
 
         // Renders top line
-        for i in 1..=width {
+        for i in start_col..=end_col {
             match i {
-                1 => print!("╭"),
-                num if num == width => print!("╮"),
+                start if start == start_col => print!("╭"),
+                num if num == end_col => print!("╮"),
                 _ => print!("─"),
             }
         }
         cursor.down(1);
 
         // Renders left and side lines
-        for _ in 1..height - 1 {
-            cursor.jump_to_col(left_column);
+        for _ in start_line..end_line - 1 {
+            cursor.jump_to_col(start_col);
             print!("│");
-            cursor.jump_to_col(right_column);
+            cursor.jump_to_col(end_col);
             print!("│");
             cursor.down(1);
         }
 
         // Renders bottom line
-        cursor.jump_to_col(left_column);
-        for i in 1..=width {
+        cursor.jump_to_col(start_col);
+        for i in start_col..=end_col {
             match i {
-                1 => print!("╰"),
-                num if num == width => print!("╯"),
+                start if start == start_col => print!("╰"),
+                num if num == end_col => print!("╯"),
                 _ => print!("─"),
             }
         }
