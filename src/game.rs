@@ -44,9 +44,9 @@ impl SnakeGame {
 
         let snake_boundaries: Border = Border::new(
             border.start_col + 2, 
-            width - 1, 
+            border.end_col - 1, 
             border.start_line + 1, 
-            height - 1
+            border.end_line - 1
         );
         let head_position = self.random_position();
         self.snake = Snake::new(
