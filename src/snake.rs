@@ -79,56 +79,12 @@ impl Snake {
         true
     }
 
-    pub fn can_go_up(&self) -> bool {
-        let mut iterator = self.list.iter();
-        if let (Some(head), Some(node)) = (iterator.next(), iterator.next()) {
-            let head_position = head.get_position();
-            let node_position = node.get_position();
-            if head_position.column == node_position.column 
-                && head_position.line - 1 == node_position.line {
-                return false;
-            }
+    pub fn get_positions(&self) -> Vec<Position> {
+        let mut positions: Vec<Position> = Vec::new();
+        for node in self.list.iter() {
+            positions.push(*node.get_position());
         }
-        true
-    }
-
-    pub fn can_go_down(&self) -> bool {
-        let mut iterator = self.list.iter();
-        if let (Some(head), Some(node)) = (iterator.next(), iterator.next()) {
-            let head_position = head.get_position();
-            let node_position = node.get_position();
-            if head_position.column == node_position.column 
-                && head_position.line + 1 == node_position.line {
-                return false;
-            }
-        }
-        true
-    }
-
-    pub fn can_go_left(&self) -> bool {
-        let mut iterator = self.list.iter();
-        if let (Some(head), Some(node)) = (iterator.next(), iterator.next()) {
-            let head_position = head.get_position();
-            let node_position = node.get_position();
-            if head_position.line == node_position.line
-                && head_position.column - 1 == node_position.column {
-                return false;
-            }
-        }
-        true
-    }
-
-    pub fn can_go_right(&self) -> bool {
-        let mut iterator = self.list.iter();
-        if let (Some(head), Some(node)) = (iterator.next(), iterator.next()) {
-            let head_position = head.get_position();
-            let node_position = node.get_position();
-            if head_position.line == node_position.line
-                && head_position.column + 1 == node_position.column {
-                return false;
-            }
-        }
-        true
+        positions
     }
 
     pub fn update_positions(&mut self) {

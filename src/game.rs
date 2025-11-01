@@ -7,12 +7,65 @@ use crate::screen::Screen;
 use crate::drawing::Drawer;
 use crate::snake::{Snake, SnakeNode};
 
+fn random_position(border: &Border) -> Position {
+    let mut rng = rand::rng();
+    let border: Border = *border;
+    Position::new(
+        rng.random_range(border.start_line + 2..border.end_line-1), 
+        rng.random_range(border.start_col + 2..border.end_col-1)
+    )
+}
+
+pub enum ObjectType {
+    Food,
+    Hazard,
+}
+
 #[allow(dead_code)]
-#[derive(Debug, Default)]
+pub struct Object {
+    pub object_type: ObjectType,
+    pub position: Position,
+}
+
+impl Object {
+    pub fn new(object_type: ObjectType, position: Position) -> Self {
+        Object {
+            object_type,
+            position,
+        }
+    }
+
+    fn set_random_position(&mut self, border: &Border, invalid_positions: &Vec<Position>) {
+        let mut position = random_position(&border);
+        let mut invalid: bool = true;
+
+        while invalid {
+            invalid = false;
+            for invalid_position in invalid_positions {
+                if position == *invalid_position {
+                    position = random_position(&border);
+                    invalid = true;
+                }
+            }
+        }
+        self.position = position;
+    }
+
+}
+
+impl Default for Object {
+    fn default() -> Self {
+        Self::new(ObjectType::Food, Position::default())
+    }
+}
+
+#[allow(dead_code)]
+#[derive(Default)]
 pub struct SnakeGame {
     screen: Screen,
     score: u16,
-    food_position: Position,
+    food: Object,
+    hazards: Vec<Object>,
     snake: Snake,
     border: Border,
 }
@@ -28,9 +81,10 @@ impl SnakeGame {
         SnakeGame {
             screen,
             score: 0,
-            food_position: Position::default(),
+            food: Object::new(ObjectType::Food, Position::default()),
+            hazards: Vec::new(),
             snake: Snake::default(),
-            border: Border::new(5, width - 5, 4, height - 4),
+            border: Border::new(10, width - 10, 4, height - 4),
         }
     }
 
@@ -48,7 +102,7 @@ impl SnakeGame {
             border.start_line + 1, 
             border.end_line - 1
         );
-        let head_position = self.random_position();
+        let head_position = random_position(&border);
         self.snake = Snake::new(
             Direction::Up, 
             SnakeNode::new(
@@ -57,16 +111,26 @@ impl SnakeGame {
             Some(snake_boundaries)
         );
         self.snake.add_tails(3);
-        self.set_random_food_position(&head_position);
+        self.food.set_random_position(&border, &self.snake.get_positions());
 
         // ==== DRAWING ==== //
-        Drawer::render_food(&mut self.screen, &self.food_position);
+        Drawer::render_object(&mut self.screen, &self.food);
         Drawer::draw_snake(&mut self.screen, &self.snake);
         Screen::flush();
+
+        // Add hazards
+        let hazards_count = 8;
+        for _ in 1..=hazards_count {
+            let mut hazard = Object::new(ObjectType::Hazard, Position::default());
+            hazard.set_random_position(&border, &self.snake.get_positions());
+            Drawer::render_object(&mut self.screen, &hazard);
+            self.hazards.push(hazard);
+        }
     }
 
     pub fn run(&mut self) {
         self.init();
+        let border: Border = self.border;
         let mut game_lost = false;
         while !game_lost {
             // Handles input and exit if necessary
@@ -87,19 +151,26 @@ impl SnakeGame {
                 .get_head()
                 .expect("Should have a head")
                 .get_position();
-            if self.food_position == head_position {
+            if self.food.position == head_position {
                 info!(
                     "Ate food at line {} and column {}",
-                    self.food_position.line, self.food_position.column
+                    self.food.position.line, self.food.position.column
                 );
                 self.score += 1;
                 self.snake.add_tail();
-                self.set_random_food_position(&head_position);
-                Drawer::render_food(
+                self.food.set_random_position(&border, &self.snake.get_positions());
+                Drawer::render_object(
                     &mut self.screen, 
-                    &self.food_position
+                    &self.food
                 );
                 Drawer::draw_text(&mut self.screen, format!("Score: {}", self.score).as_str(), Position::new(self.border.start_line - 1, self.border.start_col + 2));
+            }
+
+            for hazard in self.hazards.iter() {
+                if hazard.position == head_position {
+                    game_lost = true;
+                    break;
+                }
             }
 
             Screen::flush();
@@ -144,24 +215,5 @@ impl SnakeGame {
             }
         }
         Ok(should_exit)
-    }
-
-    // Invalid position is the snake's head position, so that the food
-    // doesn't get generated on top of the snake's head
-    fn set_random_food_position(&mut self, invalid_position: &Position) {
-        let mut position = self.random_position();
-        while position == *invalid_position {
-            position = self.random_position();
-        }
-        self.food_position = position;
-    }
-
-    fn random_position(&mut self) -> Position {
-        let mut rng = rand::rng();
-        let border: Border = self.border;
-        Position::new(
-            rng.random_range(border.start_line + 2..border.end_line-1), 
-            rng.random_range(border.start_col + 2..border.end_col-1)
-        )
     }
 }

@@ -1,6 +1,6 @@
 use log::info;
 
-use crate::{screen::Screen, snake::Snake, Border, Column, Line, Position, BLUE, GREEN, RED};
+use crate::{game::{Object, ObjectType}, screen::Screen, snake::Snake, Border, Column, Line, Position, BLUE, GREEN, RED};
 
 pub struct Drawer;
 impl Drawer {
@@ -24,6 +24,21 @@ impl Drawer {
             info!("Deleted at {:?}", position);
         }
         info!("======== End Deleting snake ======");
+    }
+
+    pub fn render_object (screen: &mut Screen, object: &Object) {
+        let (icon, color) = match object.object_type {
+            ObjectType::Food => ('✿', 17),
+            ObjectType::Hazard => ('☠', RED),
+        };
+
+        Screen::draw_colored(
+            screen,
+            object.position.line,
+            object.position.column,
+            icon,
+            color
+        );
     }
 
     pub fn render_food(screen: &mut Screen, food_position: &Position) {
