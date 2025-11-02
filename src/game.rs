@@ -1,6 +1,6 @@
 use std::{thread::sleep, time::Duration};
 use crossterm::event::{Event, KeyCode};
-use log::info;
+use log::{debug, info};
 use rand::Rng;
 use crate::{Border, Direction, Position};
 use crate::screen::Screen;
@@ -184,9 +184,10 @@ impl SnakeGame {
 
     fn handle_input(&mut self) -> Result<bool, std::io::Error> {
         let mut should_exit: bool = false;
-        let event_available = Screen::poll_event().expect("Expected boolean");
+        let event_available = Screen::poll_event()?;
         if event_available {
             let event = Screen::get_event()?;
+            debug!("Event available, {:#?}", event);
             if let Event::Key(key) = event {
                 match key.code {
                     KeyCode::Left | KeyCode::Char('h') | KeyCode::Char('a') => {
@@ -212,6 +213,12 @@ impl SnakeGame {
                     KeyCode::Esc | KeyCode::Char('q') => should_exit = true,
                     _ => (),
                 }
+            }
+
+            // Empties the queue except for the last one
+            debug!("Emptied the event queue");
+            while Screen::poll_event()? {
+                let _ = Screen::get_event();
             }
         }
         Ok(should_exit)

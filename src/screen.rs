@@ -73,17 +73,6 @@ impl Screen {
 
     /// Read event (if available) or block until available
     pub fn get_event() -> std::io::Result<Event> {
-        // Empties the event queue
-        while Self::poll_event()? {
-            if let Ok(event) = read() {
-                // Returns the last event in the queue
-                if !Self::poll_event().unwrap_or(false) {
-                    return Ok(event);
-                }
-            }
-        }
-
-        // Blocks the thread if the event queue was empty
         read()
     }
 

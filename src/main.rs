@@ -4,7 +4,7 @@ use snake::game::SnakeGame;
 
 fn main() {
     let _ = WriteLogger::init(
-        LevelFilter::Info,
+        LevelFilter::Debug,
         Config::default(),
         File::create("my_rust_binary.log").unwrap(),
     );
