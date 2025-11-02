@@ -112,8 +112,8 @@ impl Snake {
         info!("==== END UPDATING POSITION ====");
     }
 
-    pub fn get_head(&mut self) -> Option<&mut SnakeNode> {
-        self.list.front_mut()
+    pub fn get_head(&mut self) -> &mut SnakeNode {
+        self.list.front_mut().expect("Head should be present")
     }
 
     pub fn get_tail(&mut self) -> Option<&mut SnakeNode> {

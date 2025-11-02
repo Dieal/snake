@@ -69,7 +69,7 @@ impl Position {
     }
 
     pub fn decrement_col(&mut self, offset: Column) {
-        let mut new_column = if offset > self.column { 0 } else { self.column - offset };
+        let mut new_column = self.column.saturating_sub(offset);
         if let Some(boundaries) = self.boundaries {
             if new_column < boundaries.start_col {
                 new_column = boundaries.end_col;
@@ -89,7 +89,7 @@ impl Position {
     }
 
     pub fn decrement_line(&mut self, offset: Column) {
-        let mut new_line = if offset > self.line { 0 } else { self.line - offset };
+        let mut new_line = self.line.saturating_sub(offset);
         if let Some(boundaries) = self.boundaries {
             if new_line < boundaries.start_line {
                 new_line = boundaries.end_line;

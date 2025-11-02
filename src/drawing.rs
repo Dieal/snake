@@ -1,6 +1,6 @@
 use log::info;
 
-use crate::{game::{Object, ObjectType}, screen::Screen, snake::Snake, Border, Column, Line, Position, BLUE, GREEN, RED};
+use crate::{game::{Object, ObjectType}, screen::Screen, snake::Snake, Border, Column, Line, Position, GREEN, RED};
 
 pub struct Drawer;
 impl Drawer {
@@ -28,7 +28,7 @@ impl Drawer {
 
     pub fn render_object (screen: &mut Screen, object: &Object) {
         let (icon, color) = match object.object_type {
-            ObjectType::Food => ('✿', 17),
+            ObjectType::Food => ('✿', 26),
             ObjectType::Hazard => ('☠', RED),
         };
 
@@ -38,16 +38,6 @@ impl Drawer {
             object.position.column,
             icon,
             color
-        );
-    }
-
-    pub fn render_food(screen: &mut Screen, food_position: &Position) {
-        Screen::draw_colored(
-            screen,
-            food_position.line,
-            food_position.column,
-            '✿',
-            RED
         );
     }
 

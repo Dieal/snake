@@ -36,14 +36,14 @@ impl Object {
     }
 
     fn set_random_position(&mut self, border: &Border, invalid_positions: &Vec<Position>) {
-        let mut position = random_position(&border);
-        let mut invalid: bool = true;
+        let mut position = random_position(border);
 
+        let mut invalid: bool = true;
         while invalid {
             invalid = false;
             for invalid_position in invalid_positions {
                 if position == *invalid_position {
-                    position = random_position(&border);
+                    position = random_position(border);
                     invalid = true;
                 }
             }
@@ -66,6 +66,7 @@ pub struct SnakeGame {
     score: u16,
     food: Object,
     hazards: Vec<Object>,
+    hazards_count: u8,
     snake: Snake,
     border: Border,
 }
@@ -83,6 +84,7 @@ impl SnakeGame {
             score: 0,
             food: Object::new(ObjectType::Food, Position::default()),
             hazards: Vec::new(),
+            hazards_count: 8,
             snake: Snake::default(),
             border: Border::new(10, width - 10, 4, height - 4),
         }
@@ -119,8 +121,7 @@ impl SnakeGame {
         Screen::flush();
 
         // Add hazards
-        let hazards_count = 8;
-        for _ in 1..=hazards_count {
+        for _ in 1..=self.hazards_count {
             let mut hazard = Object::new(ObjectType::Hazard, Position::default());
             hazard.set_random_position(&border, &self.snake.get_positions());
             Drawer::render_object(&mut self.screen, &hazard);
@@ -149,7 +150,6 @@ impl SnakeGame {
             let head_position = *self
                 .snake
                 .get_head()
-                .expect("Should have a head")
                 .get_position();
             if self.food.position == head_position {
                 info!(
