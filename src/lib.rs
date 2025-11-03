@@ -1,6 +1,7 @@
 use log::info;
 
 pub mod game;
+pub mod menu;
 mod cursor;
 mod drawing;
 mod screen;

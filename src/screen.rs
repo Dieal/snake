@@ -43,6 +43,21 @@ impl Screen {
     pub fn draw_colored(&mut self, line: Line, column: Column, character: char, color: u16) {
         self.cursor.jump(line, column);
         print!("{ESC}[38;5;{color}m{character}");
+        Self::reset_style();
+    }
+
+    pub fn draw_formatted_text(&mut self, line: Line, column: Column, text: &str, style: u16) {
+        self.cursor.jump(line, column);
+        print!("{ESC}[{style}m{text}");
+        Self::reset_style();
+    }
+
+    pub fn reset_style() {
+        print!("{ESC}[0m"); // Resets modes (color)
+    }
+
+    pub fn reset_style_at(&mut self, position: &Position) {
+        self.cursor.jump_to_position(*position);
         print!("{ESC}[0m"); // Resets modes (color)
     }
 
