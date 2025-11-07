@@ -84,7 +84,7 @@ impl SnakeGame {
             score: 0,
             food: MapItem::new(MapItemType::Food, Position::default()),
             hazards: Vec::new(),
-            hazards_count: 8,
+            hazards_count: 20,
             snake: Snake::default(),
             border: Border::new(10, width - 10, 4, height - 4),
         }
