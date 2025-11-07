@@ -2,7 +2,7 @@ use std::iter;
 
 use log::info;
 
-use crate::{game::{Object, ObjectType}, screen::Screen, snake::Snake, Border, Column, Line, Direction, Position, GREEN, RED};
+use crate::{game::{MapItem, MapItemType}, screen::Screen, snake::Snake, Border, Column, Line, Direction, Position, GREEN, RED};
 
 pub struct Drawer;
 impl Drawer {
@@ -28,16 +28,16 @@ impl Drawer {
         info!("======== End Deleting snake ======");
     }
 
-    pub fn render_object (screen: &mut Screen, object: &Object) {
-        let (icon, color) = match object.object_type {
-            ObjectType::Food => ('✿', 26),
-            ObjectType::Hazard => ('☠', RED),
+    pub fn render_map_item (screen: &mut Screen, item: &MapItem) {
+        let (icon, color) = match item.item_type {
+            MapItemType::Food => ('✿', 26),
+            MapItemType::Hazard => ('☠', RED),
         };
 
         Screen::draw_colored(
             screen,
-            object.position.line,
-            object.position.column,
+            item.position.line,
+            item.position.column,
             icon,
             color
         );

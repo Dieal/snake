@@ -16,21 +16,21 @@ fn random_position(border: &Border) -> Position {
     )
 }
 
-pub enum ObjectType {
+pub enum MapItemType {
     Food,
     Hazard,
 }
 
 #[allow(dead_code)]
-pub struct Object {
-    pub object_type: ObjectType,
+pub struct MapItem {
+    pub item_type: MapItemType,
     pub position: Position,
 }
 
-impl Object {
-    pub fn new(object_type: ObjectType, position: Position) -> Self {
-        Object {
-            object_type,
+impl MapItem {
+    pub fn new(item_type: MapItemType, position: Position) -> Self {
+        MapItem {
+            item_type,
             position,
         }
     }
@@ -53,9 +53,9 @@ impl Object {
 
 }
 
-impl Default for Object {
+impl Default for MapItem {
     fn default() -> Self {
-        Self::new(ObjectType::Food, Position::default())
+        Self::new(MapItemType::Food, Position::default())
     }
 }
 
@@ -64,8 +64,8 @@ impl Default for Object {
 pub struct SnakeGame {
     screen: Screen,
     score: u16,
-    food: Object,
-    hazards: Vec<Object>,
+    food: MapItem,
+    hazards: Vec<MapItem>,
     hazards_count: u8,
     snake: Snake,
     border: Border,
@@ -82,7 +82,7 @@ impl SnakeGame {
         SnakeGame {
             screen,
             score: 0,
-            food: Object::new(ObjectType::Food, Position::default()),
+            food: MapItem::new(MapItemType::Food, Position::default()),
             hazards: Vec::new(),
             hazards_count: 8,
             snake: Snake::default(),
@@ -116,15 +116,15 @@ impl SnakeGame {
         self.food.set_random_position(&border, &self.snake.get_positions());
 
         // ==== DRAWING ==== //
-        Drawer::render_object(&mut self.screen, &self.food);
+        Drawer::render_map_item(&mut self.screen, &self.food);
         Drawer::draw_snake(&mut self.screen, &self.snake);
         Screen::flush();
 
         // Add hazards
         for _ in 1..=self.hazards_count {
-            let mut hazard = Object::new(ObjectType::Hazard, Position::default());
+            let mut hazard = MapItem::new(MapItemType::Hazard, Position::default());
             hazard.set_random_position(&border, &self.snake.get_positions());
-            Drawer::render_object(&mut self.screen, &hazard);
+            Drawer::render_map_item(&mut self.screen, &hazard);
             self.hazards.push(hazard);
         }
     }
@@ -159,7 +159,7 @@ impl SnakeGame {
                 self.score += 1;
                 self.snake.add_tail();
                 self.food.set_random_position(&border, &self.snake.get_positions());
-                Drawer::render_object(
+                Drawer::render_map_item(
                     &mut self.screen, 
                     &self.food
                 );
