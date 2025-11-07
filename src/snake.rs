@@ -1,6 +1,7 @@
 use std::collections::LinkedList;
 use std::iter;
 
+use log::debug;
 use log::info;
 
 use crate::Border;
@@ -73,6 +74,7 @@ impl Snake {
         if let Some(boundaries) = boundaries {
             head.get_position_mut().set_boundaries(boundaries);
         }
+        head.set_direction(direction);
 
         Snake {
             direction,
@@ -192,18 +194,19 @@ impl Snake {
     }
 
     pub fn add_tail(&mut self) {
-        let direction = self.direction;
         let current_tail = self.get_tail();
         if let Some(current_tail) = current_tail {
             let prev_position: Position = *current_tail.get_position();
+            let prev_direction: Direction = current_tail.get_direction().expect("Should have direction");
             let mut position: Position = prev_position;
-            match direction {
+            match prev_direction {
                 Direction::Up => position.increment_line(1),
                 Direction::Down => position.decrement_line(1),
                 Direction::Right => position.decrement_col(1),
                 Direction::Left => position.increment_col(1),
             }
-            let new_tail = SnakeNode::new(position);
+            let mut new_tail = SnakeNode::new(position);
+            new_tail.set_direction(prev_direction);
             if let Some(direction) = new_tail.get_direction() {
                 current_tail.set_following_direction(direction);
             }
@@ -219,6 +222,7 @@ impl Snake {
     pub fn change_direction(&mut self, direction: Direction) {
         // self.prev_direction = self.direction;
         self.direction = direction;
+        self.get_head_mut().set_direction(direction);
     }
 }
 
