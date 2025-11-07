@@ -1,3 +1,5 @@
+use std::iter;
+
 use log::info;
 
 use crate::{game::{Object, ObjectType}, screen::Screen, snake::Snake, Border, Column, Line, Direction, Position, GREEN, RED};
@@ -43,18 +45,43 @@ impl Drawer {
 
     pub fn draw_snake(screen: &mut Screen, snake: &Snake) {
         info!("======== Start Drawing snake ======");
-        let mut iterator = snake.get_list().iter();
-        let head = iterator.next().expect("Should have head").get_position();
-        screen.draw_colored(head.line, head.column, '◉', GREEN);
+        let head = snake.get_head();
+        let head_position = head.get_position();
+        let mut iterator = snake.get_list().iter().peekable();
+        let _ = iterator.next(); // Skips head
+        screen.draw_colored(head_position.line, head_position.column, '◉', GREEN);
 
-        for node in iterator {
+        while let Some(node) = iterator.next() {
             let position = node.get_position();
             if let Some(direction) = node.get_direction() {
-                let character = match direction {
+                let mut character = match direction {
                     Direction::Right | Direction::Left => '━',
                     Direction::Up | Direction::Down => '┃',
                 };
-                screen.draw_colored(position.line, position.column, character, GREEN);
+
+                // I honestly don't understand why this works. The characters don't match with the directions, but
+                // somehow they are correctly rendered
+                if let Some(next_node) = iterator.peek() {
+                    if let Some(following_direction) = next_node.get_direction() {
+                        if direction != following_direction {
+                            if (matches!(direction, Direction::Down) && matches!(following_direction, Direction::Left))
+                                || (matches!(direction, Direction::Right) && matches!(following_direction, Direction::Up)){
+                                    character = '┏';
+                                } else if (matches!(direction, Direction::Down) && matches!(following_direction, Direction::Right))
+                                    || (matches!(direction, Direction::Left) && matches!(following_direction, Direction::Up)) {
+                                        character = '┓';
+                                    } else if (matches!(direction, Direction::Up) && matches!(following_direction, Direction::Left))
+                                        || (matches!(direction, Direction::Right) && matches!(following_direction, Direction::Down)) {
+                                            character = '┗';
+                                        } else if (matches!(direction, Direction::Up) && matches!(following_direction, Direction::Right))
+                                            || (matches!(direction, Direction::Left) && matches!(following_direction, Direction::Down)){
+                                                character = '┛';
+                                        }
+                                        info!("[NODE DIRECTION]: {:?}, [FOLLOWING NODE DIRECTION]: {:?}, [CHARACTER]: {character}", direction, following_direction);
+                        }
+                    }
+                    screen.draw_colored(position.line, position.column, character, GREEN);
+                }
             } else {
                 screen.draw_colored(position.line, position.column, '⬤', GREEN);
             }

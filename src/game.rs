@@ -140,7 +140,7 @@ impl SnakeGame {
                     break;
                 }
             }
-            sleep(Duration::from_millis(50)); // TODO: make clock speed configurable
+            sleep(Duration::from_millis(100)); // TODO: make clock speed configurable
 
             Drawer::delete_snake(&mut self.screen, &self.snake); // Delete previous snake
             self.snake.update_positions();
